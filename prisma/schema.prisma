@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUM DEFINITIONS
+enum UserRole {
+  COMMUNITY_MEMBER
+  CELL_MODERATOR
+  DISTRICT_VIEWER
+  ADMIN
+}
+
+enum ActivityCategory {
+  CLEANING
+  CONSTRUCTION
+  ENVIRONMENT
+  HEALTH
+  EDUCATION
+  INFRASTRUCTURE
+  AGRICULTURE
+  SOCIAL_SERVICES
+  OTHER
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  HELPFUL
+  INSPIRING
+}
+
+// MODELS
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          UserRole  @default(COMMUNITY_MEMBER)
+  cellId        String?
+  cell          Cell?     @relation(fields: [cellId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  posts         Post[]
+  comments      Comment[]
+  reactions     Reaction[]
+  reposts       Repost[]
+  
+  @@index([cellId])
+  @@index([email])
+}
+
+model Cell {
+  id        String    @id @default(cuid())
+  name      String
+  code      String    @unique
+  sectorId  String
+  sector    Sector    @relation(fields: [sectorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  users     User[]
+  posts     Post[]
+  
+  @@index([sectorId])
+  @@index([code])
+}
+
+model Sector {
+  id         String   @id @default(cuid())
+  name       String
+  code       String   @unique
+  districtId String
+  district   District @relation(fields: [districtId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  cells      Cell[]
+  posts      Post[]
+  
+  @@index([districtId])
+  @@index([code])
+}
+
+model District {
+  id        String    @id @default(cuid())
+  name      String
+  code      String    @unique
+  province  String    @default("Rwanda")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  sectors   Sector[]
+  posts     Post[]
+  
+  @@index([code])
+}
+
+model Post {
+  id              String    @id @default(cuid())
+  content         String
+  authorId        String
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  cellId          String
+  cell            Cell      @relation(fields: [cellId], references: [id])
+  sectorId        String
+  sector          Sector    @relation(fields: [sectorId], references: [id])
+  districtId      String
+  district        District  @relation(fields: [districtId], references: [id])
+  
+  category        ActivityCategory
+  status          PostStatus @default(PUBLISHED)
+  
+  // Media
+  images          PostImage[]
+  
+  // Engagement
+  comments        Comment[]
+  reactions       Reaction[]
+  reposts         Repost[]
+  
+  // Hashtags
+  hashtags        String[]  @default([])
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([authorId])
+  @@index([cellId])
+  @@index([sectorId])
+  @@index([districtId])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model PostImage {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String?  // Cloudinary public ID for deletion
+  caption   String?
+  createdAt DateTime @default(now())
+  
+  @@index([postId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  reactions Reaction[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([postId])
+  @@index([authorId])
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  type      ReactionType
+  postId    String?
+  post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, postId, type])
+  @@unique([userId, commentId, type])
+  @@index([postId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model Repost {
+  id            String   @id @default(cuid())
+  postId        String
+  post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  caption       String?  // Optional caption when reposting
+  
+  createdAt     DateTime @default(now())
+  
+  @@unique([postId, authorId])
+  @@index([postId])
+  @@index([authorId])
+}
+
+// Analytics snapshot - for caching aggregated data
+model AnalyticsSnapshot {
+  id                String   @id @default(cuid())
+  cellId            String?
+  sectorId          String?
+  districtId        String?
+  
+  totalPosts        Int      @default(0)
+  totalComments     Int      @default(0)
+  totalReactions    Int      @default(0)
+  totalReposts      Int      @default(0)
+  
+  topCategories     Json     @default("[]")
+  topHashtags       Json     @default("[]")
+  engagementScore   Float    @default(0)
+  
+  generatedAt       DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([cellId])
+  @@index([sectorId])
+  @@index([districtId])
+}

@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: umuganda_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-umuganda}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-umuganda_dev}
+      POSTGRES_DB: ${DB_NAME:-umuganda_db}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-umuganda}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - umuganda_network
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: umuganda_app
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${DB_USER:-umuganda}:${DB_PASSWORD:-umuganda_dev}@postgres:5432/${DB_NAME:-umuganda_db}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-secret-key-for-dev}
+      NEXTAUTH_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - umuganda_network
+    command: |
+      sh -c "npm run prisma:migrate -- --skip-generate &&
+             npm run dev"
+
+volumes:
+  postgres_data:
+
+networks:
+  umuganda_network:
+    driver: bridge

@@ -1,0 +1,51 @@
+{
+  "name": "umuganda-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "next": "16.0.10",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "next-auth": "^5.0.0-beta.20",
+    "@prisma/client": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "recharts": "^2.14.0",
+    "cloudinary": "^2.2.0",
+    "next-cloudinary": "^6.10.0",
+    "zod": "^3.22.4",
+    "clsx": "^2.0.0",
+    "date-fns": "^3.3.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^29.5.8",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.10",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "prisma": "^6.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.1.5",
+    "playwright": "^1.40.1",
+    "@playwright/test": "^1.40.1"
+  }
+}
