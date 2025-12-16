@@ -1,4 +1,5 @@
-import { Feed } from '@/components'
+import { Feed } from "@/src/components"
+
 
 export default function Home() {
   // Mock data - in a real app, this would come from the API
@@ -48,7 +49,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-3">Welcome to Umuganda</h2>
           <p className="text-lg opacity-90">
             Share your community impact, celebrate achievements, and inspire others.
-            Together, let's build a stronger Rwanda through transparent impact tracking.
+            Together, let&apos;s build a stronger Rwanda through transparent impact tracking.
           </p>
           <button className="mt-6 bg-white text-lime-moss font-bold py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors">
             Share Your Work
@@ -65,19 +66,4 @@ export default function Home() {
       />
     </div>
   )
-}
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
 }

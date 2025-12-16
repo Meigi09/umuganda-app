@@ -29,7 +29,7 @@ services:
     container_name: umuganda_app
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: postgresql://${DB_USER:-umuganda}:${DB_PASSWORD:-umuganda_dev}@postgres:5432/${DB_NAME:-umuganda_db}
+      DATABASE_URL: postgresql://${DB_USER:-umuganda}:${DB_PASSWORD:-umuganda_dev}@postgres:5432/${DB_NAME:-umuganda}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-secret-key-for-dev}
       NEXTAUTH_URL: http://localhost:3000
     ports:
